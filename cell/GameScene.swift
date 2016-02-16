@@ -23,6 +23,11 @@ class GameScene: SKScene {
             for j in 1...heightNum {
                 let node = SKSpriteNode(imageNamed: "water")
                 node.position = CGPoint(x: -nodeSize / 2 + i * nodeSize, y: -nodeSize / 2 + j * nodeSize)
+                let mutable: NSMutableDictionary = NSMutableDictionary()
+                mutable.setObject(i, forKey: "y")
+                mutable.setObject(j, forKey: "x")
+
+                node.userData = mutable
                 grid.append(node)
             }
         }
@@ -53,6 +58,7 @@ class GameScene: SKScene {
     func iteration() {
         for item in grid {
             item.texture = grass
+            //print("x:\(item.userData?.objectForKey("x") as! Int), y:\(item.userData?.objectForKey("y") as! Int)")
         }
     }
 }
