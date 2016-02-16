@@ -41,11 +41,18 @@ class GameScene: SKScene {
             addChild(item)
         }
         
+        runAction(SKAction.sequence([ SKAction.waitForDuration(2.0), SKAction.runBlock(iteration)]))
     }
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
     }
    
     override func update(currentTime: CFTimeInterval) {
+    }
+    
+    func iteration() {
+        for item in grid {
+            item.texture = grass
+        }
     }
 }
