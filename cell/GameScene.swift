@@ -55,15 +55,13 @@ class GameScene: SKScene {
     }
     
     override func didMoveToView(view: SKView) {
+        //debugDrawPlayableArea()
         backgroundColor = SKColor.blackColor()
-        
-        debugDrawPlayableArea()
-        
         for item in grid {
             addChild(item)
         }
         
-        //runAction(SKAction.sequence([SKAction.waitForDuration(2.0), SKAction.runBlock(iteration)]))
+        runAction(SKAction.sequence([SKAction.waitForDuration(2.0), SKAction.runBlock(iteration)]))
     }
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
@@ -106,6 +104,7 @@ class GameScene: SKScene {
         shape.path = path
         shape.strokeColor = SKColor.redColor()
         shape.lineWidth = 4.0
+        shape.zPosition = 1
         addChild(shape)
     }
 
