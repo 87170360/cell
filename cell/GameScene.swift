@@ -56,7 +56,7 @@ class GameScene: SKScene {
             addChild(item)
         }
         
-        runAction(SKAction.repeatActionForever(SKAction.sequence([SKAction.waitForDuration(2.0), SKAction.runBlock(iteration)])))
+        runAction(SKAction.repeatActionForever(SKAction.sequence([SKAction.waitForDuration(0.5), SKAction.runBlock(iteration)])))
     }
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
@@ -70,13 +70,23 @@ class GameScene: SKScene {
         let idx = getIndex(x, y: y)
         print("touch idx:\(idx), x:\(x), y:\(y)")
         
-        grid[idx].texture = grass
-        grid[idx].userData?.setObject(1, forKey: "s")
-    }
-   
-    override func update(currentTime: CFTimeInterval) {
+        setLive(grid[idx])
     }
     
+    override func touchesMoved(touches: Set<UITouch>, withEvent event: UIEvent?) {
+        guard let touch = touches.first else {
+            return
+        }
+        let touchLocation = touch.locationInNode(self)
+        let node = self.nodeAtPoint(touchLocation) as! SKSpriteNode
+        let x = node.userData?.objectForKey("x") as! Int
+        let y = node.userData?.objectForKey("y") as! Int
+        let idx = getIndex(x, y: y)
+        print("touch idx:\(idx), x:\(x), y:\(y)")
+        
+        setLive(grid[idx])
+    }
+   
     func iteration() {
         for item in grid {
             computelive(item)
