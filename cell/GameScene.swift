@@ -38,7 +38,7 @@ class GameScene: SKScene {
                 let mutable: NSMutableDictionary = NSMutableDictionary()
                 mutable.setObject(j, forKey: "x")
                 mutable.setObject(i, forKey: "y")
-                mutable.setObject("w", forKey: "t")
+                mutable.setObject(0, forKey: "s")
                 mutable.setObject(idx, forKey: "idx")
                 ++idx
                 node.userData = mutable
@@ -46,7 +46,6 @@ class GameScene: SKScene {
             }
         }
  
-
         super.init(size: size)
     }
     
@@ -61,7 +60,7 @@ class GameScene: SKScene {
             addChild(item)
         }
         
-        runAction(SKAction.sequence([SKAction.waitForDuration(2.0), SKAction.runBlock(iteration)]))
+        runAction(SKAction.repeatActionForever(SKAction.sequence([SKAction.waitForDuration(2.0), SKAction.runBlock(iteration)])))
     }
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
@@ -81,7 +80,14 @@ class GameScene: SKScene {
     
     func iteration() {
         for item in grid {
-            item.texture = grass
+            let state = item.userData?.objectForKey("s") as! Int
+            if state == 0 {
+                item.texture = grass
+                item.userData?.setObject(1, forKey: "s")
+            } else {
+                item.texture = water
+                item.userData?.setObject(0, forKey: "s")
+            }
             //let x = item.userData?.objectForKey("x") as! Int
             //let y = item.userData?.objectForKey("y") as! Int
             //let up = getUp(x, y: y)
