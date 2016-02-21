@@ -45,7 +45,6 @@ class GameScene: SKScene {
                 grid.append(node)
             }
         }
- 
         super.init(size: size)
     }
     
@@ -60,7 +59,7 @@ class GameScene: SKScene {
             addChild(item)
         }
         
-        runAction(SKAction.repeatActionForever(SKAction.sequence([SKAction.waitForDuration(2.0), SKAction.runBlock(iteration)])))
+        //runAction(SKAction.repeatActionForever(SKAction.sequence([SKAction.waitForDuration(2.0), SKAction.runBlock(iteration)])))
     }
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
@@ -73,6 +72,13 @@ class GameScene: SKScene {
         let x = node.userData?.objectForKey("x") as! Int
         let y = node.userData?.objectForKey("y") as! Int
         print("touch idx:\(idx), x:\(x), y:\(y)")
+        
+        grid[idx].texture = grass
+        
+        let nodeRound = getRound(x, y: y)
+        for item in nodeRound {
+            item.texture = grass
+        }
     }
    
     override func update(currentTime: CFTimeInterval) {
@@ -94,13 +100,61 @@ class GameScene: SKScene {
         }
     }
     
-    func getUp(node: SKSpriteNode) -> SKSpriteNode? {
-        let idx = node.userData?.objectForKey("idx") as! Int
-        if idx < widthNum {
-            return nil
-        } else {
-            return grid[idx - widthNum]
+    func getRound(x: Int, y: Int) -> [SKSpriteNode] {
+        var result:[SKSpriteNode] = []
+        if let up = getUp(x, y: y) {
+            result.append(up)
         }
+        if let down = getDown(x, y: y) {
+            result.append(down)
+        }
+        if let left = getLeft(x, y: y) {
+            result.append(left)
+        }
+        if let right = getRight(x, y: y) {
+            result.append(right)
+        }
+        if let upLeft = getLeft(x, y: y + 1) {
+            result.append(upLeft)
+        }
+        if let upRight = getRight(x, y: y + 1) {
+            result.append(upRight)
+        }
+        if let downLeft = getLeft(x, y: y - 1) {
+            result.append(downLeft)
+        }
+        if let downRight = getRight(x, y: y - 1) {
+            result.append(downRight)
+        }
+        return result
+    }
+    
+    func getUp(x: Int, y: Int) -> SKSpriteNode? {
+        guard let newY:Int = y + 1 where newY > 0 && newY < heightNum else {
+            return nil
+        }
+        return grid[Int(x % widthNum + (newY - 1) * widthNum - 1)]
+    }
+    
+    func getDown(x: Int, y: Int) -> SKSpriteNode? {
+        guard let newY:Int = y - 1 where newY > 0 && newY < heightNum else {
+            return nil
+        }
+        return grid[Int(x % widthNum + (newY - 1) * widthNum - 1)]
+    }
+    
+    func getLeft(x: Int, y: Int) -> SKSpriteNode? {
+        guard let newX:Int = x - 1 where newX > 0 && newX < widthNum else {
+            return nil
+        }
+        return grid[Int(newX % widthNum + (y - 1) * widthNum - 1)]
+    }
+
+    func getRight(x: Int, y: Int) -> SKSpriteNode? {
+        guard let newX:Int = x + 1 where newX > 0 && newX < widthNum else {
+            return nil
+        }
+        return grid[Int(newX % widthNum + (y - 1) * widthNum - 1)]
     }
     
     func debugDrawPlayableArea() {
@@ -113,5 +167,4 @@ class GameScene: SKScene {
         shape.zPosition = 1
         addChild(shape)
     }
-
 }
