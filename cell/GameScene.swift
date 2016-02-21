@@ -28,7 +28,6 @@ class GameScene: SKScene {
         widthNum = Int(playableRect.width) / nodeWidth
         heightNum = Int(playableRect.height) / nodeHeight
         
-        var idx: Int = 0
         for i in 1...heightNum {
             for j in 1...widthNum {
                 let node = SKSpriteNode(imageNamed: "water")
@@ -39,8 +38,6 @@ class GameScene: SKScene {
                 mutable.setObject(j, forKey: "x")
                 mutable.setObject(i, forKey: "y")
                 mutable.setObject(0, forKey: "s")
-                mutable.setObject(idx, forKey: "idx")
-                ++idx
                 node.userData = mutable
                 grid.append(node)
             }
@@ -59,7 +56,7 @@ class GameScene: SKScene {
             addChild(item)
         }
         
-        //runAction(SKAction.repeatActionForever(SKAction.sequence([SKAction.waitForDuration(2.0), SKAction.runBlock(iteration)])))
+        runAction(SKAction.repeatActionForever(SKAction.sequence([SKAction.waitForDuration(2.0), SKAction.runBlock(iteration)])))
     }
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
@@ -68,17 +65,13 @@ class GameScene: SKScene {
         }
         let touchLocation = touch.locationInNode(self)
         let node = self.nodeAtPoint(touchLocation) as! SKSpriteNode
-        let idx = node.userData?.objectForKey("idx") as! Int
         let x = node.userData?.objectForKey("x") as! Int
         let y = node.userData?.objectForKey("y") as! Int
+        let idx = getIndex(x, y: y)
         print("touch idx:\(idx), x:\(x), y:\(y)")
         
         grid[idx].texture = grass
-        
-        let nodeRound = getRound(x, y: y)
-        for item in nodeRound {
-            item.texture = grass
-        }
+        grid[idx].userData?.setObject(1, forKey: "s")
     }
    
     override func update(currentTime: CFTimeInterval) {
@@ -86,17 +79,7 @@ class GameScene: SKScene {
     
     func iteration() {
         for item in grid {
-            let state = item.userData?.objectForKey("s") as! Int
-            if state == 0 {
-                item.texture = grass
-                item.userData?.setObject(1, forKey: "s")
-            } else {
-                item.texture = water
-                item.userData?.setObject(0, forKey: "s")
-            }
-            //let x = item.userData?.objectForKey("x") as! Int
-            //let y = item.userData?.objectForKey("y") as! Int
-            //let up = getUp(x, y: y)
+            computelive(item)
         }
     }
     
@@ -130,31 +113,32 @@ class GameScene: SKScene {
     }
     
     func getUp(x: Int, y: Int) -> SKSpriteNode? {
-        guard let newY:Int = y + 1 where newY > 0 && newY < heightNum else {
+        guard let newY:Int = y + 1 where newY > 0 && newY <= heightNum && x > 0 && x <= widthNum else {
             return nil
         }
-        return grid[Int(x % widthNum + (newY - 1) * widthNum - 1)]
+        return grid[getIndex(x, y: newY)]
     }
     
     func getDown(x: Int, y: Int) -> SKSpriteNode? {
-        guard let newY:Int = y - 1 where newY > 0 && newY < heightNum else {
+        guard let newY:Int = y - 1 where newY > 0 && newY <= heightNum && x > 0 && x <= widthNum else {
             return nil
         }
-        return grid[Int(x % widthNum + (newY - 1) * widthNum - 1)]
+        return grid[getIndex(x, y: newY)]
     }
     
     func getLeft(x: Int, y: Int) -> SKSpriteNode? {
-        guard let newX:Int = x - 1 where newX > 0 && newX < widthNum else {
+        guard let newX:Int = x - 1 where newX > 0 && newX <= widthNum && y > 0 && y <= heightNum  else {
             return nil
         }
-        return grid[Int(newX % widthNum + (y - 1) * widthNum - 1)]
+        return grid[getIndex(newX, y: y)]
     }
 
     func getRight(x: Int, y: Int) -> SKSpriteNode? {
-        guard let newX:Int = x + 1 where newX > 0 && newX < widthNum else {
+        guard let newX:Int = x + 1 where newX > 0 && newX <= widthNum && y > 0 && y <= heightNum  else {
             return nil
         }
-        return grid[Int(newX % widthNum + (y - 1) * widthNum - 1)]
+        let index = getIndex(newX, y: y)
+        return grid[index]
     }
     
     func debugDrawPlayableArea() {
@@ -166,5 +150,42 @@ class GameScene: SKScene {
         shape.lineWidth = 4.0
         shape.zPosition = 1
         addChild(shape)
+    }
+    
+    func computelive(node: SKSpriteNode) {
+        let x = node.userData?.objectForKey("x") as! Int
+        let y = node.userData?.objectForKey("y") as! Int
+        let nodeRound = getRound(x, y: y)
+        var live = 0
+        
+        for item in nodeRound {
+            if item.userData?.objectForKey("s") as! Int == 1 {
+                live++
+            }
+        }
+        if live == 3 {
+            setLive(node)
+            return
+        }
+        
+        if live == 2 {
+            return
+        }
+        
+        setDie(node)
+    }
+    
+    func setLive(node: SKSpriteNode) {
+        node.texture = grass
+        node.userData?.setObject(1, forKey: "s")
+    }
+    
+    func setDie(node: SKSpriteNode) {
+        node.texture = water
+        node.userData?.setObject(0, forKey: "s")
+    }
+    
+    func getIndex(x: Int, y: Int) -> Int {
+        return x + (y - 1) * widthNum - 1
     }
 }
