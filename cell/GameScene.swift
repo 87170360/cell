@@ -31,13 +31,13 @@ class GameScene: SKScene {
         for i in 1...heightNum {
             for j in 1...widthNum {
                 let node = SKSpriteNode(imageNamed: "water")
-                let x = Int(CGRectGetMinX(playableRect)) + nodeWidth / 2 + (j - 1) * Int(nodeWidth)
-                let y = Int(CGRectGetMinY(playableRect)) + nodeHeight / 2 + (i - 1) * Int(nodeHeight)
+                let x = Int(playableRect.minX) + nodeWidth / 2 + (j - 1) * Int(nodeWidth)
+                let y = Int(playableRect.minY) + nodeHeight / 2 + (i - 1) * Int(nodeHeight)
                 node.position = CGPoint(x:x, y:y)
                 let mutable: NSMutableDictionary = NSMutableDictionary()
-                mutable.setObject(j, forKey: "x")
-                mutable.setObject(i, forKey: "y")
-                mutable.setObject(0, forKey: "s")
+                mutable.setObject(j, forKey: "x" as NSCopying)
+                mutable.setObject(i, forKey: "y" as NSCopying)
+                mutable.setObject(0, forKey: "s" as NSCopying)
                 node.userData = mutable
                 grid.append(node)
             }
@@ -49,38 +49,38 @@ class GameScene: SKScene {
         fatalError("xx")
     }
     
-    override func didMoveToView(view: SKView) {
+    override func didMove(to view: SKView) {
         //debugDrawPlayableArea()
-        backgroundColor = SKColor.blackColor()
+        backgroundColor = SKColor.black
         for item in grid {
             addChild(item)
         }
         
-        runAction(SKAction.repeatActionForever(SKAction.sequence([SKAction.waitForDuration(0.5), SKAction.runBlock(iteration)])))
+        run(SKAction.repeatForever(SKAction.sequence([SKAction.wait(forDuration: 0.5), SKAction.run(iteration)])))
     }
     
-    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else {
             return
         }
-        let touchLocation = touch.locationInNode(self)
-        let node = self.nodeAtPoint(touchLocation) as! SKSpriteNode
-        let x = node.userData?.objectForKey("x") as! Int
-        let y = node.userData?.objectForKey("y") as! Int
+        let touchLocation = touch.location(in: self)
+        let node = self.atPoint(touchLocation) as! SKSpriteNode
+        let x = node.userData?.object(forKey: "x") as! Int
+        let y = node.userData?.object(forKey: "y") as! Int
         let idx = getIndex(x, y: y)
         print("touch idx:\(idx), x:\(x), y:\(y)")
         
         setLive(grid[idx])
     }
     
-    override func touchesMoved(touches: Set<UITouch>, withEvent event: UIEvent?) {
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else {
             return
         }
-        let touchLocation = touch.locationInNode(self)
-        let node = self.nodeAtPoint(touchLocation) as! SKSpriteNode
-        let x = node.userData?.objectForKey("x") as! Int
-        let y = node.userData?.objectForKey("y") as! Int
+        let touchLocation = touch.location(in: self)
+        let node = self.atPoint(touchLocation) as! SKSpriteNode
+        let x = node.userData?.object(forKey: "x") as! Int
+        let y = node.userData?.object(forKey: "y") as! Int
         let idx = getIndex(x, y: y)
         print("touch idx:\(idx), x:\(x), y:\(y)")
         
@@ -93,7 +93,7 @@ class GameScene: SKScene {
         }
     }
     
-    func getRound(x: Int, y: Int) -> [SKSpriteNode] {
+    func getRound(_ x: Int, y: Int) -> [SKSpriteNode] {
         var result:[SKSpriteNode] = []
         if let up = getUp(x, y: y) {
             result.append(up)
@@ -122,29 +122,29 @@ class GameScene: SKScene {
         return result
     }
     
-    func getUp(x: Int, y: Int) -> SKSpriteNode? {
-        guard let newY:Int = y + 1 where newY > 0 && newY <= heightNum && x > 0 && x <= widthNum else {
+    func getUp(_ x: Int, y: Int) -> SKSpriteNode? {
+        guard let newY:Int = y + 1 , newY > 0 && newY <= heightNum && x > 0 && x <= widthNum else {
             return nil
         }
         return grid[getIndex(x, y: newY)]
     }
     
-    func getDown(x: Int, y: Int) -> SKSpriteNode? {
-        guard let newY:Int = y - 1 where newY > 0 && newY <= heightNum && x > 0 && x <= widthNum else {
+    func getDown(_ x: Int, y: Int) -> SKSpriteNode? {
+        guard let newY:Int = y - 1 , newY > 0 && newY <= heightNum && x > 0 && x <= widthNum else {
             return nil
         }
         return grid[getIndex(x, y: newY)]
     }
     
-    func getLeft(x: Int, y: Int) -> SKSpriteNode? {
-        guard let newX:Int = x - 1 where newX > 0 && newX <= widthNum && y > 0 && y <= heightNum  else {
+    func getLeft(_ x: Int, y: Int) -> SKSpriteNode? {
+        guard let newX:Int = x - 1 , newX > 0 && newX <= widthNum && y > 0 && y <= heightNum  else {
             return nil
         }
         return grid[getIndex(newX, y: y)]
     }
 
-    func getRight(x: Int, y: Int) -> SKSpriteNode? {
-        guard let newX:Int = x + 1 where newX > 0 && newX <= widthNum && y > 0 && y <= heightNum  else {
+    func getRight(_ x: Int, y: Int) -> SKSpriteNode? {
+        guard let newX:Int = x + 1 , newX > 0 && newX <= widthNum && y > 0 && y <= heightNum  else {
             return nil
         }
         let index = getIndex(newX, y: y)
@@ -152,25 +152,32 @@ class GameScene: SKScene {
     }
     
     func debugDrawPlayableArea() {
+        
+        
         let shape = SKShapeNode()
-        let path = CGPathCreateMutable()
-        CGPathAddRect(path, nil, playableRect)
+        //let path = CGMutablePath()
+        //CGPathAddRect(path, nil, playableRect)
+        
+        let path : CGMutablePath = CGMutablePath()
+        path.addRect(playableRect)
+
+        
         shape.path = path
-        shape.strokeColor = SKColor.redColor()
+        shape.strokeColor = SKColor.red
         shape.lineWidth = 4.0
         shape.zPosition = 1
         addChild(shape)
     }
     
-    func computelive(node: SKSpriteNode) {
-        let x = node.userData?.objectForKey("x") as! Int
-        let y = node.userData?.objectForKey("y") as! Int
+    func computelive(_ node: SKSpriteNode) {
+        let x = node.userData?.object(forKey: "x") as! Int
+        let y = node.userData?.object(forKey: "y") as! Int
         let nodeRound = getRound(x, y: y)
         var live = 0
         
         for item in nodeRound {
-            if item.userData?.objectForKey("s") as! Int == 1 {
-                live++
+            if item.userData?.object(forKey: "s") as! Int == 1 {
+                live += 1
             }
         }
         if live == 3 {
@@ -185,17 +192,17 @@ class GameScene: SKScene {
         setDie(node)
     }
     
-    func setLive(node: SKSpriteNode) {
+    func setLive(_ node: SKSpriteNode) {
         node.texture = grass
-        node.userData?.setObject(1, forKey: "s")
+        node.userData?.setObject(1, forKey: "s" as NSCopying)
     }
     
-    func setDie(node: SKSpriteNode) {
+    func setDie(_ node: SKSpriteNode) {
         node.texture = water
-        node.userData?.setObject(0, forKey: "s")
+        node.userData?.setObject(0, forKey: "s" as NSCopying)
     }
     
-    func getIndex(x: Int, y: Int) -> Int {
+    func getIndex(_ x: Int, y: Int) -> Int {
         return x + (y - 1) * widthNum - 1
     }
 }

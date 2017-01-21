@@ -100,6 +100,7 @@
 					83EB9F781C718991009C15EE = {
 						CreatedOnToolsVersion = 7.2.1;
 						DevelopmentTeam = ZE4S9XFG6J;
+						LastSwiftMigration = 0800;
 					};
 				};
 			};
@@ -258,6 +259,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.book.heart.cell;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -269,6 +271,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.book.heart.cell;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};
@@ -291,6 +294,7 @@
 				83EB9F911C718992009C15EE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
